@@ -6,15 +6,13 @@ import Movie from './components/Moives';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/movie",
     element: <App />,
-    children: [
-      {
-        path: "/director",
-      },
-      { path: "/producer", element: <Movie /> },
-      { path: "/movie", element: <Movie /> },
-    ],
+    // children: [
+    //   {
+    //     path: "/director",
+    //   },
+    // ],
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(

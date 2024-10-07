@@ -12,20 +12,23 @@ const Movie = () => {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const producerAPI = await axios.get("http://localhost:9999/producers");
-        const directorAPI = await axios.get("http://localhost:9999/directors");
-        const startAPI = await axios.get("http://localhost:9999/stars");
-        const movieAPI = await axios.get("http://localhost:9999/movies");
+        const [producerAPI, directorAPI, startAPI, movieAPI] =
+          await Promise.all([
+            axios.get("http://localhost:9999/producers"),
+            axios.get("http://localhost:9999/directors"),
+            axios.get("http://localhost:9999/stars"),
+            axios.get("http://localhost:9999/movies"),
+          ]);
         setProduct(producerAPI.data);
         const loadMovies = movieAPI.data.map((movie) => {
           const director = directorAPI.data.find(
-            (dir) => dir.id === movie.director
+            (dir) => dir.id === movie.director.toString()
           );
           const producer = producerAPI.data.find(
-            (producer) => producer.id === movie.producer
+            (producer) => producer.id === movie.producer.toString()
           );
           const stars = movie.stars.map((starId) =>
-            startAPI.data.find((star) => star.id === starId)
+            startAPI.data.find((star) => star.id === starId.toString())
           );
 
           return { ...movie, director, producer, stars };
@@ -46,10 +49,12 @@ const Movie = () => {
           );
           setMovie(filteredMoviesByGenre);
         }
-        if (idParam != null) {
+        if (idParam !== null) {
           const filteredMoviesByProducerId = loadMovies.filter(
-            (movie) => movie.producer.toString() === idParam.toString()
+            (movie) => movie.producer.id === idParam
           );
+          console.log(filteredMoviesByProducerId);
+          
           setMovie(filteredMoviesByProducerId);
         }
       } catch (error) {
@@ -58,6 +63,7 @@ const Movie = () => {
     };
     fetch();
   }, [location]);
+  console.log(movie);
 
   return (
     <>
@@ -72,7 +78,7 @@ const Movie = () => {
 
             <ul className="d-flex list-unstyled justify-content-center">
               {genres.map((data) => (
-                <li className="mx-3">
+                <li className="mx-3" key={data}>
                   <div>
                     <Link to={"/movie/?genre=" + data}>
                       {data.toUpperCase()}
@@ -89,7 +95,7 @@ const Movie = () => {
             <h3>Producer</h3>
             <ul>
               {product.map((data) => (
-                <li>
+                <li key={data.id}>
                   <div>
                     <Link to={"/movie/?producer-id=" + data.id}>
                       {data.name}
@@ -128,7 +134,7 @@ const Movie = () => {
                     <td>{movie.producer.name}</td>
                     <td>{movie.director.fullname}</td>
                     <td>{movie.genres.join(", ")}</td>
-                    <td style={{ whiteSpace: 'nowrap', width: '200px' }}>
+                    <td style={{ whiteSpace: "nowrap", width: "200px" }}>
                       {movie.stars.map((star, index) => (
                         <div key={star.id}>
                           {`${index + 1} - ${star.fullname}`} <br />
